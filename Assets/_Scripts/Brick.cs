@@ -8,11 +8,16 @@ public class Brick : MonoBehaviour
     protected GameObject player;
     protected CharacterController2Dimensional characterController;
 
+    private Vector2 bounds;
+    [SerializeField] private float boxCastCheckDistance;
+
     // Use this for initialization
     protected void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
         characterController = player.GetComponent<CharacterController2Dimensional>();
+
+        bounds = GetComponent<Collider2D>().bounds.extents;
     }
 	
 	// Update is called once per frame
@@ -23,8 +28,9 @@ public class Brick : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        ExtDebug.DrawBoxCastBox(transform.position, GetComponent<Collider2D>().bounds.extents - new Vector3(0.01f, 0.01f), Quaternion.identity, Vector2.down, .3f, Color.white);
-        if (Physics2D.BoxCast(transform.position, GetComponent<Collider2D>().bounds.extents, 0, Vector2.down, .3f, Player))
+        //Check if player collided with box and if player is not in small mario state destroy box
+        ExtDebug.DrawBoxCastBox(transform.position, bounds, Quaternion.identity, Vector2.down, boxCastCheckDistance, Color.white);
+        if (Physics2D.BoxCast(transform.position, bounds, 0, Vector2.down, boxCastCheckDistance, Player))
         {
             if (collision.gameObject.CompareTag("Player") &&
             characterController.characterState != CharacterController2Dimensional.CharacterState.smallMario)

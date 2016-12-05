@@ -8,6 +8,12 @@ public class EnemyController : MonoBehaviour
 
     [SerializeField] private LayerMask Player;
 
+    [SerializeField] private Vector2 bounds;
+    [SerializeField] private Vector2 playerJumpHeight;
+    [SerializeField] private float boxCastCheckDistance;
+    [SerializeField] private float rayCastCheckDistance;
+    [SerializeField] private float invinceTime;
+
     private bool moveRight = true;
     
     private GameObject player;
@@ -23,6 +29,7 @@ public class EnemyController : MonoBehaviour
 	// Update is called once per frame
 	void Update()
     {
+        //Update direction
 	    if (moveRight)
         {
             movement(right);
@@ -40,31 +47,31 @@ public class EnemyController : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collider)
     {
+        //Change direction upon collision with enemy collider
         if (collider.gameObject.CompareTag("Enemy Collider"))
         {
             moveRight = !moveRight;
         }
 
-        if (collider.gameObject.CompareTag("Player"))
+        //Check if the player is above, if so destroy self and add upwards velocity to player
+        if (Physics2D.BoxCast(transform.position, bounds, 0, Vector2.up, boxCastCheckDistance, Player))
         {
-            if (Physics2D.Raycast(new Vector2(transform.position.x - 0.5f, transform.position.y), -Vector2.right, 0.1f, Player) ||
-                Physics2D.Raycast(new Vector2(transform.position.x + 0.5f, transform.position.y), Vector2.right, 0.1f, Player))
-            {
-                if (characterController.characterState != CharacterController2Dimensional.CharacterState.smallMario && characterController.invulnerable == false)
-                {
-                    --characterController.characterState;
-                    characterController.InvulnerableState(1);
-                }
-                else if (characterController.invulnerable == false)
-                {
-                    characterController.Reset();
-                }
-            }
-            else if (Physics2D.BoxCast(transform.position, Vector3.one, 0, Vector2.up, .3f, Player))
-            {
-                player.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 10);
-                Destroy(gameObject);
-            }
+            player.GetComponent<Rigidbody2D>().velocity = playerJumpHeight;
+            Destroy(gameObject);
         }
+        //Check if player collided with enemy on the left or right side and damage player accordingly
+        else if (Physics2D.Raycast(new Vector2(transform.position.x - bounds.x, transform.position.y), -Vector2.right, rayCastCheckDistance, Player) ||
+                 Physics2D.Raycast(new Vector2(transform.position.x + bounds.x, transform.position.y), Vector2.right, rayCastCheckDistance, Player))
+        {
+            if (characterController.characterState != CharacterController2Dimensional.CharacterState.smallMario && characterController.invulnerable == false)
+            {
+                --characterController.characterState;
+                characterController.InvulnerableState(invinceTime);
+            }
+            else if (characterController.invulnerable == false)
+            {
+                characterController.Reset();
+            }
+        }   
     }
 }

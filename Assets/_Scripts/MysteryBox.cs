@@ -17,6 +17,10 @@ public class MysteryBox : MonoBehaviour
 
     [SerializeField] private int itemAmount = 1;
 
+    [SerializeField] private float boxCastCheckDistance;
+
+    private Vector2 bounds;
+
     private CharacterController2Dimensional characterController;
     private GameObject player;
 
@@ -27,6 +31,7 @@ public class MysteryBox : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player");
         characterController = player.GetComponent<CharacterController2Dimensional>();
+        bounds = GetComponent<Collider2D>().bounds.extents;
     }
 
     // Update is called once per frame
@@ -77,8 +82,8 @@ public class MysteryBox : MonoBehaviour
     void OnCollisionEnter2D(Collision2D collision)
     {
         //If Character Hits the Bottom of the Mystery Box Spawn Item of Correct Type
-        ExtDebug.DrawBoxCastBox(transform.position, GetComponent<Collider2D>().bounds.extents - new Vector3(0.01f, 0.01f), Quaternion.identity, Vector2.down, .3f, Color.white);
-        if (Physics2D.BoxCast(transform.position, GetComponent<Collider2D>().bounds.extents, 0, Vector2.down, .3f, Player))
+        ExtDebug.DrawBoxCastBox(transform.position, bounds, Quaternion.identity, Vector2.down, boxCastCheckDistance, Color.white);
+        if (Physics2D.BoxCast(transform.position, bounds, 0, Vector2.down, boxCastCheckDistance, Player))
         {
             if (collision.gameObject.CompareTag("Player") && boxActive)
             {
